@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/EmployeeManagementSystem/static/css/main.c8dbfcf4.css",
+    "main.js": "/EmployeeManagementSystem/static/js/main.0502fdae.js",
+    "static/media/forgotpass.png": "/EmployeeManagementSystem/static/media/forgotpass.d348a0c77a25798aa665.png",
+    "static/media/userl.png": "/EmployeeManagementSystem/static/media/userl.9dc92b0a1003b149f6c9.png",
+    "index.html": "/EmployeeManagementSystem/index.html",
+    "main.c8dbfcf4.css.map": "/EmployeeManagementSystem/static/css/main.c8dbfcf4.css.map",
+    "main.0502fdae.js.map": "/EmployeeManagementSystem/static/js/main.0502fdae.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c8dbfcf4.css",
+    "static/js/main.0502fdae.js"
+  ]
+}
