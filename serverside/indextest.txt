@@ -1,0 +1,253 @@
+import express, { response } from "express";
+const app = express();
+import bodyParser from "body-parser";
+import cors from "cors";
+import mysql from "mysql2";
+import         bcrypt, { hash } from "bcrypt";
+import cookieParser from "cookie-parser";
+            import session from "express-session";
+
+
+const db = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "Password@007",
+  database: "crud_org",
+});
+app.use(express.json());
+app.use(cors({
+  origin: ["http://localhost:3000"],
+  methods: ["GET","POST","PUT","DELETE"],
+  credentials: true
+}));
+
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(session({
+  key: "userId",
+  secret: "powerschool",
+  resave: false,
+  saveUninitialized: false,
+  cookie :{
+    expires : 15*1000,
+  },
+}))
+
+
+//cookies
+app.get("/login",(req,res) => {
+  if(req.session.user){
+    res.send({loggedIn: true,user: req.session.user})
+  } else{
+    res.send({loggedIn: false})
+  }
+})
+
+
+//get
+app.get("/api/get", (req, res) => {
+  const sqlGet = "SELECT * FROM ps_management";
+  db.query(sqlGet, (error, result) => {
+    //console.log(result);
+    res.send(result);
+  });
+});
+//post
+app.post("/api/post", (req, res) => {
+  const { fname, lname, uname, password, email, phn_no } = req.body;
+  //let validation:string[] = [];
+  bcrypt.hash(password, 10, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+    const sqlcheck = "SELECT * FROM ps_management WHERE uname=?  ";
+    db.query(sqlcheck, uname, (error, result) => {
+      if (error) {
+        console.log(error);
+      } else {
+        const sqlInsert =
+          "INSERT INTO ps_management (fname,lname,Uname,password, email, phn_no) VALUES (?, ?, ?,?,?,?)";
+        db.query(
+          sqlInsert,
+          [fname.trim(), lname, uname, hash, email, phn_no],
+          (error, result) => {
+            if (error) {
+              //console.log(error);
+              if (error.sqlMessage.includes(uname)) {
+                res.send({ msg: "Username has been taken.Try something new " });
+              } else if (error.sqlMessage.includes(phn_no)) {
+                res.send({ msg: "Contact has been taken.Try something new " });
+              } else if (error.sqlMessage.includes(email)) {
+                res.send({ msg: "E-mail has been taken.Try something new " });
+              }
+            } else {
+              res.send({ msgsuc: "Registered Successfull " });
+            }
+          }
+        );
+      }
+    });
+  });
+});
+
+//delete
+app.delete("/api/remove/:id", (req, res) => {
+  const { id } = req.params;
+  const sqlremove = "DELETE from ps_management WHERE id = ?";
+  db.query(sqlremove, id, (error, result) => {
+    if (error) {
+      console.log(error);
+    }
+  });
+});
+
+//editpage get existing data on particular id
+app.get("/api/get/:id", (req, res) => {
+  const { id } = req.params;
+  const sqlGet = "SELECT * FROM ps_management WHERE id=?";
+  db.query(sqlGet, id, (error, result) => {
+    if (error) {
+      console.log(error);
+    }
+
+    res.send(result);
+    //console.log(result);
+  });
+});
+
+//update
+app.put("/api/update/:id", (req, res) => {
+  const { id } = req.params;
+  const { fname, lname, uname, password, email, phn_no } = req.body;
+  bcrypt.hash(password, 10, (err, hash) => {
+    if (err) {
+      console.log(err);
+    }
+    const sqlUpdate =
+      "UPDATE ps_management SET fname=?,lname=?,Uname=?,password=?, email=?, phn_no=? WHERE id=?";
+    db.query(
+      sqlUpdate,
+      [fname, lname, uname, hash, email, phn_no, id],
+      (error, result) => {
+        if (error) {
+          //console.log(error);
+          if (error.sqlMessage.includes(email)) {
+            res.send({ msg: "E-mail has been taken.Try something new " });
+          } else if (error.sqlMessage.includes(phn_no)) {
+            res.send({ msg: "Contact has been taken.Try something new " });
+          }
+        } else {
+          // res.send(result)
+          res.send({ msgsuc: "Updated Successfully " });
+        }
+      }
+    );
+  });
+});
+
+//update status to Deactive
+app.put("/api/statusD/:id", (req, res) => {
+  const { id } = req.params;
+  var status = "Deactive";
+  const sqlUpdate = "update ps_management set status =?  where id=?";
+  db.query(sqlUpdate, [status, id], (error, result) => {
+    if (error) {
+      console.log(error);
+    }
+    res.send(result);
+  });
+});
+
+//update status to Active
+app.put("/api/statusA/:id", (req, res) => {
+  const { id } = req.params;
+  var status = "Active";
+  const sqlUpdate = "update ps_management set status =?  where id=?";
+  db.query(sqlUpdate, [status, id], (error, result) => {
+    if (error) {
+      console.log(error);
+    }
+    res.send(result);
+  });
+});
+
+//exist in the db for login
+app.post("/login", (req, res) => {
+  //console.log('LOGIN HANDLER', req.body);
+  const { uname, password } = req.body;
+  const sqlcheck = "SELECT * FROM ps_management WHERE uname=?";
+  db.query(sqlcheck, uname, (error, result) => {
+    if (error) {
+      res.send({ error: error });
+    }
+
+    if (result.length > 0) {
+      bcrypt.compare(password, result[0].password, (error, response) => {
+        if (response) {
+          req.session.user = result;
+          console.log(req.session.user);
+          res.send(result);
+        } else {
+          res.send({ message: "Invalid Username/Password" });
+        }
+      });
+    } else {
+      res.send({ message: "User doesn't exist" });
+    }
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+//exist phn_no in the db for reset passowrd.
+app.post("/fpassword", (req, res) => {
+  const { phn_no } = req.body;
+
+  const sqlcheck = "SELECT  * FROM ps_management WHERE phn_no=? ";
+  db.query(sqlcheck, phn_no, (error, result) => {
+    if (error) {
+      res.send({ error: error });
+    }
+    if (Array.isArray(result) && result.length > 0) {
+      res.send(result);
+    } else {
+      res.send({ message: "Contact does not exist" });
+    }
+  });
+});
+
+//update default password
+app.put("/api/resetpassword/:phn_no", (req, res) => {
+  const { phn_no } = req.params;
+  var password = "User@12345";
+  bcrypt.hash(password, 10, (err, hash) => {
+    const sqlUpdate = "update ps_management set password=? where phn_no=?";
+    db.query(sqlUpdate, [hash, phn_no], (error, result) => {
+      if (error) {
+        console.log(error);
+      }
+      res.send(result);
+    });
+  });
+});
+
+// export const log =async (req:any, res:any)  => {
+//     const {uname,password} = req.body;
+//     const checkquery = "SELECT * from ps_management where email=? ";
+// const data = db.query(checkquery,[uname],async (error,result) => {
+//     console.log(result);
+// })}
+//SELECT EXISTS(SELECT * from ps_management WHERE fname='vikraam');
+
+app.listen(5000, () => {
+  console.log("Server is running on port 5000");
+});

@@ -1,0 +1,1015 @@
+////////////////////////////////////// REGISTER PAGE //////////////////////////////////////
+
+import React, {useState,useEffect} from 'react';
+import {useParams,Link,useNavigate} from 'react-router-dom';
+
+
+import './login.css';
+import axios from 'axios';
+import {toast} from 'react-toastify'
+
+const initialstate = {
+  fname:"",
+  lname: "",
+  uname:"",
+  password:"",
+  cpassword:"", 
+  email:"", 
+  phn_no:""
+   
+};
+
+const Register = () => { 
+   const[state,setState]=useState(initialstate);
+   const {fname,lname,uname,password,cpassword, email, phn_no} = state;
+   const navigate = useNavigate();
+
+   const handleSubmit = (e:React.ChangeEvent<any> )=>{
+  e.preventDefault();
+  if (!fname || !lname || !uname || !password || !cpassword || !email || !phn_no) 
+  {
+    toast.error("Please provide value into each input field");
+  }
+  
+  
+   else if(password != cpassword)
+   {
+          toast.error("password could not match ");
+         
+   }
+   else  if(phn_no.length != 10)
+   {
+          toast.error("Phone number must be 10 digits ");
+   }
+      else{
+    axios.post("http://localhost:5000/api/post", {
+      fname,lname,uname,password,cpassword, email, phn_no
+    })
+    .then(() => {
+    setState({fname: "", lname: "",uname: "",password:"",cpassword:"",email:"", phn_no: "" });
+    })
+    .catch((err) => toast.error(err.response.data));
+    toast.success("User Registered Successfully");
+    setTimeout(() => navigate("/"), 500);
+   
+  }
+};
+   const handleInputChange = (e:React.ChangeEvent<any>) =>{
+    const {name,value} = e.target;
+    setState({...state,[name]:value});
+   }
+
+    return (
+        <div >
+<form className="form" 
+onSubmit={handleSubmit} >
+    <h2 style={{fontWeight: "Bold"}}>Registration Form</h2>
+    <br/>
+  <br/>
+  <label className='lab'>First Name</label>
+  <div className="input-container">
+  <i className="fa fa-user icon"></i>
+<input className="input-field"
+type="text"
+//id="fname"
+name="fname"
+placeholder="First Name" required
+value={fname}
+onChange={handleInputChange} />
+</div>
+<label className='lab'>Last Name</label>
+  <div className="input-container">
+
+   
+    <i className="fa fa-user icon"></i>
+<input className="input-field"
+type="text"
+id="lname"
+name="lname"
+placeholder="Last Name" required
+value={lname}
+onChange={handleInputChange} /></div>
+
+<label className='lab'>Username</label>
+  <div className="input-container">
+ 
+   
+<i className="fa fa-user icon"></i>
+<input className="input-field"
+type="text"
+id="uname"
+name="uname"
+placeholder="Username" required
+value={uname}
+onChange={handleInputChange} /> </div>
+
+<label className='lab'>Password</label>
+  <div className="input-container">
+  
+    <i className="fa fa-key icon"></i>
+<input className="input-field"
+type="password"
+id="passowrd"
+name="password"
+placeholder="password" required
+value={password}
+onChange={handleInputChange} /></div>
+
+<label className='lab'>Confirm Password</label>
+  <div className="input-container">
+  
+    <i className="fa fa-key icon"></i>
+<input className="input-field"
+type="password"
+id="passowrd"
+name="cpassword"
+placeholder="Confirm Password" required
+value={cpassword}
+onChange={handleInputChange} /></div>
+
+<label className='lab'>E-Mail</label>
+  <div className="input-container">
+ 
+    <i className="fa fa-envelope icon"></i>
+<input className="input-field"
+type="email"
+id="email"
+name="email"
+placeholder="Email Address" required
+value={email}
+onChange={handleInputChange} /></div>
+
+
+<label className='lab'>Contact No</label>
+  <div className="input-container">
+  
+    <i className="fa fa-phone icon"></i>
+<input className="input-field"
+type="number"
+id="phn_no"
+name="phn_no"
+placeholder="(9876543210)" required
+value={phn_no}
+onChange={handleInputChange} /></div>
+
+<input type="submit" value="Submit" />
+<Link to="/">
+    <input type = "button" value = "Go Back" />
+</Link>
+</form>
+</div>
+    )
+ }
+ 
+
+ export default Register;
+
+ ///////////////////////////////////// EDIT PAGE ////////////////////////////////////////////////
+
+
+ import React, {useState,useEffect} from 'react';
+import {useParams,Link,useNavigate} from 'react-router-dom';
+
+import "./Addedit.css";
+import axios from 'axios';
+import {toast} from 'react-toastify'
+import e from 'express';
+
+const initialstate = {
+  fname:"",
+  lname: "",
+  uname:"",
+  password:"",
+  cpassword:"", 
+  email:"", 
+  phn_no:""
+   
+};
+
+
+const Edit = () => { 
+   const[state,setState]=useState(initialstate);
+   const {fname,lname,uname,password,cpassword, email, phn_no} = state;
+   const navigate = useNavigate();
+   const { id } = useParams();
+   useEffect(() => {
+    axios.get(`http://localhost:5000/api/get/${id}`)
+    .then((resp) => setState({ ... resp.data[0] }));
+    }, [id]);
+
+   const handleSubmit = (e:React.ChangeEvent<any> )=>{
+  e.preventDefault();
+  if (!fname || !lname || !uname || !password || !cpassword || !email || !phn_no) {
+    toast.error("Please provide value into each input field");
+    }
+       else{
+        axios.put(`http://localhost:5000/api/update/${id}`, {
+            fname,lname,uname,password,cpassword, email, phn_no
+            })
+            .then(() => {
+            setState({ fname: "", lname: "",uname: "",password:"",cpassword:"",email:"", phn_no: "" });
+            })
+            .catch((error) => toast.error(error.response.data));
+            toast.success("User Updated successfully");
+
+    setTimeout(() => navigate("/homepage"), 500);
+
+}
+};
+   const handleInputChange = (e:React.ChangeEvent<any>) =>{
+    const {name,value} = e.target;
+    setState({...state,[name]:value});
+   }
+
+    return (
+        <div style={{marginTop: "100px"}}>
+<form style={{
+margin: "auto",
+padding: "15px",
+maxWidth: "400px",
+alignContent: "center"
+}}
+onSubmit={handleSubmit} >
+  <label htmlFor="fname">First Name</label>
+<input
+type="text"
+id="fname"
+name="fname"
+placeholder="First Name" required
+value={fname || "" }
+onChange={handleInputChange} />
+ <label htmlFor="lname">Last Name</label>
+<input
+type="text"
+id="lname"
+name="lname"
+placeholder="Last Name" required
+value={lname || ""}
+onChange={handleInputChange} />
+
+ <label htmlFor="Uname">Username</label>
+<input
+type="text" readOnly
+id="uname"
+name="uname"
+placeholder="Username" required
+value={uname || ""}
+onChange={handleInputChange} />
+
+ <label htmlFor="password">Password</label>
+<input
+type="password"
+id="passowrd"
+name="password"
+placeholder="password" required
+value={password || "" }
+onChange={handleInputChange} />
+
+ <label htmlFor="password">Confirm Password</label>
+<input
+type="password"
+id="passowrd"
+name="cpassword" 
+placeholder="Confirm Password" required
+value={cpassword || ""}
+onChange={handleInputChange} />
+
+ <label htmlFor="email">Email</label>
+<input
+type="email"
+id="email"
+name="email"
+placeholder="Email Address" required
+value={email || "" }
+onChange={handleInputChange} />
+ <label htmlFor="contact">Contact No.</label>
+<input
+type="number"
+id="phn_no"
+name="phn_no"
+placeholder="(9876543210)" required
+value={phn_no || ""}
+onChange={handleInputChange} />
+<input type="submit" value="Update" />
+<Link to="/homepage">
+    <input type = "button" value = "Go Back" />
+</Link>
+</form>
+</div>
+    )
+ }
+ 
+
+ export default Edit;
+  
+
+   ///////////////////////////////////// HOME PAGE ////////////////////////////////////////////////
+
+   import React,{useState,useEffect} from "react";
+import { Link } from "react-router-dom";
+import "./Home.css";
+import {toast} from 'react-toastify';
+import axios from "axios";
+
+interface form {
+    id: number;
+    fname: string;
+    lname: string;
+    uname: string;
+    email: string;
+    phn_no : number;
+    status:string;
+  }
+
+const Home = () => {
+    const[data,setData]=useState<Array<form>>([]);
+
+    const loadData =async () => {
+    const response = await axios.get("http://localhost:5000/api/get");
+    setData(response.data);
+};
+useEffect(()=>{
+    loadData();
+},[]);
+
+const deletecontact =(id:number) =>{
+ if(window.confirm("Are you sure that you want to delete that contact ?"))
+ {
+    axios.delete(`http://localhost:5000/api/remove/${id}`);
+    toast.success("User Deleted Successfully");
+    setTimeout(() => loadData(),500);
+ }
+}
+    return (
+   <div style={{marginTop: "150px"}}>
+    <Link to="/">
+        <button className="btn btn-contact">Log out</button>
+    </Link>
+   <table className="styled-table">
+    <thead>
+        <tr>
+            <th style={{textAlign : "center"}}>No</th>
+            <th style={{textAlign : "center"}}>First Name</th>
+            <th style={{textAlign : "center"}}>Last Name</th>
+            <th style={{textAlign : "center"}}>Username</th>
+            <th style={{textAlign : "center"}}>Email</th>
+            <th style={{textAlign : "center"}}>Contact Number</th>
+            <th style={{textAlign : "center"}}>Status</th>
+            <th style={{textAlign : "center"}}>Action</th>
+        </tr>
+
+    </thead>
+    <tbody>
+      {data.map((item,index) =>{
+        return(
+            <tr key={item.id}>
+                <th scope="row">{index+1}</th>
+                <td>{item.fname}</td>
+                <td>{item.lname}</td>
+                <td>{item.uname}</td>
+                <td>{item.email}</td>
+                <td>{item.phn_no}</td>
+                <td>{item.status}</td>
+                <td>
+               
+<Link to={`/update/${item.id}`} >
+<button className= "btn btn-edit"> Edit</button>
+</Link>
+<button className="btn btn-delete" onClick={() => deletecontact(item.id)}> Delete</button>
+
+<button className= "btn btn-actived">Deactivate</button>
+
+
+    </td>
+        </tr>
+        )
+      })}
+    </tbody>
+   </table>
+   </div>
+    );
+};
+export default Home;
+
+
+////////////////////////////////////// LOGIN PAGE //////////////////////////////////////
+
+
+import React ,{useState} from 'react';
+import {useParams,Link,useNavigate} from 'react-router-dom';
+import './login.css';
+
+import {toast} from 'react-toastify'
+
+
+const initialstate = {
+   
+    uname:"",
+    password:"",
+};
+
+const Login = () => { 
+    const[state,setState]=useState(initialstate);
+   const {uname,password} = state;
+    const navigate = useNavigate();
+
+    const handleSubmit = (e:React.ChangeEvent<any> )=>{
+        e.preventDefault();
+        if (!uname || !password ) {
+            toast.error("Please provide value into each input field");
+            }
+            else{
+              if(uname && password )  {
+                toast.success("user logged successfully");
+                setTimeout(() => navigate("/homepage"), 500);
+              }
+              else{
+                toast.error("Invalid username or password");
+              }
+            }
+
+    }
+
+    const handleInputChange = (e:React.ChangeEvent<any>) =>{
+        const {name,value} = e.target;
+        setState({...state,[name]:value});
+       }
+
+
+
+return(
+
+ <div style={{marginTop: "100px"}}>
+<form onSubmit={handleSubmit}>
+   <div className="input-container">
+   <i className="fa fa-user icon"></i>
+<input
+type="text" className='input-field'
+id="uname"
+name="uname"
+placeholder="Username" required
+//value={Uname}
+onChange={handleInputChange}
+ />
+</div>
+
+<div className="input-container">
+    <i className="fa fa-key icon"></i>
+<input
+type="password"
+id="passowrd"
+name="password"
+placeholder="password" required
+//value={password}
+onChange={handleInputChange}
+/>
+</div>
+<div className="box" >
+<input type='checkbox' /> <span>Remember me</span>   
+<a href=''>Forgot Password?</a>
+</div>
+
+ <input type="submit" value="Login"/>
+
+
+<Link to="/addContact/register">
+    <input type = "button" value = "Register" />
+</Link>
+</form>
+</div>
+    )
+ }
+
+ export default Login;
+
+
+
+ ////////////////////////////////////// SERVERSIDE(INDEX PAGE) //////////////////////////////////////
+
+ import express from "express";
+const app = express();
+import  bodyParser from "body-parser";
+import cors from "cors";
+import mysql from "mysql2";
+
+
+const db = mysql.createPool({
+    host: "localhost",
+    user: "root",
+    password: "Password@007",
+    database:"crud_org"
+});
+
+app.use(cors());
+app.use(express.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
+//get
+app.get("/api/get", (req, res) => {
+    const sqlGet = "SELECT * FROM ps_management";
+    db.query(sqlGet, (error, result) => {
+        //console.log(result);
+    res.send(result);
+    });
+});
+//post
+app.post("/api/post", (req, res) => {
+    const { fname,lname,uname,password,cpassword, email, phn_no } = req.body;
+    const sqlInsert =
+    "INSERT INTO ps_management (fname,lname,Uname,password,cpassword, email, phn_no) VALUES (?, ?, ?,?,?,?,?)";
+    db.query(sqlInsert, [fname,lname,uname,password,cpassword, email, phn_no], (error, result) => {
+    if (error) {
+    console.log(error);
+    }
+    });
+    });
+//delete
+    app.delete("/api/remove/:id", (req, res) => {
+        const { id } = req.params;
+        const sqlremove =
+        "DELETE from ps_management WHERE id = ?";
+        db.query(sqlremove, id, (error, result) => {
+        if (error) {
+        console.log(error);
+        }
+        });
+        });
+
+//editpage get existing data on particular id 
+        app.get("/api/get/:id", (req, res) => {
+            const { id } = req.params;
+            const sqlGet = "SELECT * FROM ps_management WHERE id=?";
+            db.query(sqlGet,id, (error, result) => {
+                if(error){
+                    console.log(error);
+                }
+
+            res.send(result)
+            //console.log(result);
+            });
+        });   
+
+ //update
+ app.put("/api/update/:id", (req, res) => {
+    const { id } = req.params;
+    const{fname,lname,uname,password,cpassword, email, phn_no}=req.body;
+    const sqlUpdate = "UPDATE ps_management SET fname=?,lname=?,Uname=?,password=?,cpassword=?, email=?, phn_no=? WHERE id=?";
+    db.query(sqlUpdate,[fname,lname,uname,password,cpassword, email, phn_no,id], (error, result) => {
+        if(error){
+            console.log(error);
+        }
+    res.send(result)
+    });
+});  
+
+
+// app.get("/", (req,res) =>{
+//     const sqlinsert = "Insert into management(name,email,contact) values ('hari','hari@gmail.com',6985458)";
+//    db.query(sqlinsert,(error,result) =>{
+//     console.log("error",error);
+//     console.log("result",result);
+//     res.send("hello express");
+//    });
+   
+// });
+
+
+app.listen(5000, () =>{
+    console.log("Server is running on port 5000");
+})
+
+
+
+
+
+
+
+///////////////////////////////////////////////////
+
+
+
+ const statusfilter = async (value:any) =>{
+ 
+  const response = await axios.get(`http://localhost:5000/api/get?status=${value}`);
+    setData(response.data);
+  }
+
+
+
+  <div className="filter">
+       <tr >
+        <h5>Filter By Status:</h5>
+    <button onClick={() => statusfilter("Active")}>Active</button>
+    <br/><br/>
+    <button  onClick={() => statusfilter("Deactive")}>Deactive</button>
+    </tr></div>
+
+
+
+
+     const[value,setValue] = useState("");
+
+
+
+
+
+     ///////////////////////////////////register and edit css code/////////////////////////////////
+
+     input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+
+select{
+width: 100%;
+padding: 12px 20px;
+margin: 8px 0;
+display: inline-block;
+border: 1px solid #ccc;
+border-radius: 4px;
+box-sizing: border-box;
+}
+input[type="submit"] {
+width: 100%;
+background-color: #4caf50;
+color: white;
+padding: 14px 20px;
+margin: 8px 0;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+}
+input[type="button"] {
+    width: 100%;
+    background-color: #40453e;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    }
+    input[type="submit"]:hover {
+    background-color: #45a049;
+    }
+    label {
+        margin-bottom: 0.5em;
+        color: #444;
+        font-weight: lighter;
+      }
+
+
+
+//////////////////////////////login page testing authentication /////////////////////////////
+
+
+import React ,{useState} from 'react';
+import {Link,useNavigate} from 'react-router-dom';
+import './login.css';
+import user from './userl.png'
+import {toast} from 'react-toastify'
+import axios from 'axios';
+
+// interface form {
+//   id: number;
+//   fname: string;
+//   lname: string;
+//   uname: string;
+//     password: string;
+//   email: string;
+//   phn_no : number;
+//   status:string;
+// }
+
+
+// const initialstate = {
+   
+//     uname:"",
+//     password:"",
+// };
+
+const Login = () => {
+   
+   //const[state,setState]=useState(initialstate);
+  // const[data,setData]=useState<Array<form>>([]);
+  
+
+   const[username,setUsername] = useState("");
+   const[Password,setPassword] = useState("");
+   const[loginstatus,setLoginstatus]= useState("");
+  // const {uname,password} = state;
+    const navigate = useNavigate();
+
+  //   const handleSubmit = (e:React.ChangeEvent<any> )=>{
+  //       e.preventDefault();
+  //       if (!uname || !password ) {
+  //           toast.error("Please Enter username or password");
+  //           }
+           
+  //           else{
+
+  //                const result = axios.post("http://localhost:5000/api/getch",{
+  //                 uname,password})
+  //                console.log(result);
+  //               if(typeof result)
+  //               {
+
+  //                toast.success("user logged successfully");
+  //               setTimeout(() => navigate("/homepage"), 500);
+  //               }
+  //             else
+  //             {
+  //           toast.error("Inavlid");
+  //             }
+
+  //   }
+  // }
+
+    // const handleInputChange = (e:React.ChangeEvent<any>) =>{
+    //     const {name,value} = e.target;
+    //     setState({...state,[name]:value});
+    //    }
+
+
+const login= () => {
+  axios.post("http://localhost:5000/login",{
+  uname: username,
+  password: Password,
+  }).then((response)=>{
+   
+
+    if(response.data.message){
+       setLoginstatus(response.data.message)
+    }
+    else{
+     setLoginstatus(response.data[0].uname)
+      navigate("/homepage");
+    }
+          // toast.success("user logged successfully");
+        
+  })
+}
+
+
+
+return(
+
+ <div >
+<form className="form" onSubmit={login} >
+<h2>Login Form</h2>
+<img src={user}  alt="user"/>
+<br/>
+  <br/>
+   <div className="input-container">
+   <i className="fa fa-user icon"></i>
+<input  className='input-field'
+type="text"
+id="uname"
+name="uname"
+placeholder="Username" required
+
+onChange={(e) =>{setUsername(e.target.value)}}
+ />
+</div>
+
+<div className="input-container">
+    <i className="fa fa-key icon"></i>
+<input className='input-field'
+type="password"
+id="passowrd"
+name="password"
+placeholder="password" required
+
+onChange={(e) =>{setPassword(e.target.value)}}
+/>
+</div>
+<div className="remember" >
+<input type='checkbox'  name="remember"/> <span>Remember me</span>   </div>
+<p style={{marginLeft : "230px"}}>
+<Link to="/fpassword">Forgot passord?</Link>
+</p>
+<br/>
+  <br/>
+  
+  <input type="submit" value="Login" />
+  <br/>
+
+
+
+<Link to="/register">
+<input type="button" value ="Register" />
+</Link>
+
+</form>
+
+<h2>{loginstatus}</h2>
+</div>
+    )
+ }
+
+ export default Login;
+
+
+
+
+
+
+
+
+
+
+
+
+   //  .then(() => {
+                //   setState({uname:" ",password:""});
+                //  }).catch((err) => toast.error(err.response.data));
+
+
+                //   .catch((err) => toast.error(err.response.data));
+                //   const loadData =async () => {
+                //     const response = await axios.get("http://localhost:5000/api/get");
+                //     setData(response.data);
+                // };
+               
+                // data.map((item,index) =>{
+                  
+                //   if(uname == item.uname){
+                //   toast.success("user logged successfully");
+                //   setTimeout(() => navigate("/homepage"), 500);
+                //   }
+                //   else{
+                //     toast.error("invalid username or password")
+                //   }
+                // })
+              
+
+
+
+
+
+
+              //////////////////////////////Register page testing authentication /////////////////////////////
+
+import React, {useState,useEffect} from 'react';
+import {useParams,Link,useNavigate} from 'react-router-dom';
+
+
+import './login.css';
+import axios from 'axios';
+import {toast} from 'react-toastify'
+
+const initialstate = {
+  fname:"",
+  lname: "",
+  uname:"",
+  password:"",
+  cpassword:"", 
+  email:"", 
+  phn_no:""
+   
+};
+
+const Register = () => { 
+   const[state,setState]=useState(initialstate);
+   const {fname,lname,uname,password,cpassword, email, phn_no} = state;
+   const navigate = useNavigate();
+
+   const handleSubmit = (e:React.ChangeEvent<any> )=>{
+  e.preventDefault();
+  if (!fname || !lname || !uname || !password || !cpassword || !email || !phn_no) 
+  {
+    toast.error("Please provide value into each input field");
+  }
+  
+  
+   else if(password != cpassword)
+   {
+          toast.error("password could not match ");
+         
+   }
+   else  if(phn_no.length != 10)
+   {
+          toast.error("Phone number must be 10 digits ");
+   }
+      else{
+    axios.post("http://localhost:5000/api/post", {
+      fname,lname,uname,password,cpassword, email, phn_no
+    })
+    .then(() => {
+    setState({fname: "", lname: "",uname: "",password:"",cpassword:"",email:"", phn_no: "" });
+    })
+    .catch((err) => toast.error(err.response.data));
+    toast.success("User Registered Successfully");
+    setTimeout(() => navigate("/"), 500);
+   
+  }
+};
+   const handleInputChange = (e:React.ChangeEvent<any>) =>{
+    const {name,value} = e.target;
+    setState({...state,[name]:value});
+   }
+
+    return (
+        <div >
+<form className="form" 
+onSubmit={handleSubmit} >
+    <h2 style={{fontWeight: "Bold"}}>Registration Form</h2>
+    <br/>
+  <br/>
+  <label className='lab'>First Name</label>
+  <div className="input-container">
+  <i className="fa fa-user icon"></i>
+<input className="input-field"
+type="text"
+//id="fname"
+name="fname"
+placeholder="First Name" required
+value={fname}
+onChange={handleInputChange} />
+</div>
+<label className='lab'>Last Name</label>
+  <div className="input-container">
+
+   
+    <i className="fa fa-user icon"></i>
+<input className="input-field"
+type="text"
+id="lname"
+name="lname"
+placeholder="Last Name" required
+value={lname}
+onChange={handleInputChange} /></div>
+
+<label className='lab'>Username</label>
+  <div className="input-container">
+ 
+   
+<i className="fa fa-user icon"></i>
+<input className="input-field"
+type="text"
+id="uname"
+name="uname"
+placeholder="Username" required
+value={uname}
+onChange={handleInputChange} /> </div>
+
+<label className='lab'>Password</label>
+  <div className="input-container">
+  
+    <i className="fa fa-key icon"></i>
+<input className="input-field"
+type="password"
+id="passowrd"
+name="password"
+placeholder="password" required
+value={password}
+onChange={handleInputChange} /></div>
+
+<label className='lab'>Confirm Password</label>
+  <div className="input-container">
+  
+    <i className="fa fa-key icon"></i>
+<input className="input-field"
+type="password"
+id="passowrd"
+name="cpassword"
+placeholder="Confirm Password" required
+value={cpassword}
+onChange={handleInputChange} /></div>
+
+<label className='lab'>E-Mail</label>
+  <div className="input-container">
+ 
+    <i className="fa fa-envelope icon"></i>
+<input className="input-field"
+type="email"
+id="email"
+name="email"
+placeholder="Email Address" required
+value={email}
+onChange={handleInputChange} /></div>
+
+
+<label className='lab'>Contact No</label>
+  <div className="input-container">
+  
+    <i className="fa fa-phone icon"></i>
+<input className="input-field"
+type="number"
+id="phn_no"
+name="phn_no"
+placeholder="(9876543210)" required
+value={phn_no}
+onChange={handleInputChange} /></div>
+
+<input type="submit" value="Submit" />
+<Link to="/">
+    <input type = "button" value = "Go Back" />
+</Link>
+</form>
+</div>
+    )
+ }
+ 
+
+ export default Register;
